@@ -100,7 +100,7 @@
 	<!-- Backdrop for mobile/smaller screens -->
 	<div 
 		class="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-40 transition-opacity lg:hidden"
-		on:click={closeDrawer}
+		onclick={closeDrawer}
 		role="button"
 		tabindex="-1"
 		aria-label="Cerrar panel"
@@ -115,7 +115,7 @@
 			</h2>
 			<button 
 				class="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-200 rounded-full transition-colors"
-				on:click={closeDrawer}
+				onclick={closeDrawer}
 			>
 				<X class="w-5 h-5" />
 			</button>
@@ -155,7 +155,7 @@
 							<button 
 								class="flex-1 py-2 text-sm font-medium rounded-md border transition-colors
 									{formData.status === option.value ? option.color + ' ring-2 ring-offset-1 ring-brand-green/30' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'}"
-								on:click={() => formData.status = option.value}
+								onclick={() => formData.status = option.value}
 							>
 								{option.label}
 							</button>
@@ -199,7 +199,7 @@
 							<button
 								class="px-3 py-1 text-sm rounded-full border transition-colors
 									{formData.features.includes(feature) ? 'bg-brand-green text-white border-brand-green' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-100'}"
-								on:click={() => toggleFeature(feature)}
+								onclick={() => toggleFeature(feature)}
 							>
 								{feature}
 							</button>
@@ -231,7 +231,7 @@
 							{#each formData.images.hero as imgUrl, i}
 								<div class="relative group aspect-square rounded-md overflow-hidden bg-slate-100 border border-slate-200">
 									<img src={imgUrl} alt="Hero" class="w-full h-full object-cover" />
-									<button class="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity" on:click={() => removeExistingImage(i, 'hero')}><X class="w-3 h-3" /></button>
+									<button class="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity" onclick={() => removeExistingImage(i, 'hero')}><X class="w-3 h-3" /></button>
 								</div>
 							{/each}
 						</div>
@@ -247,7 +247,7 @@
 							{#each formData.images.ground as imgUrl, i}
 								<div class="relative group aspect-square rounded-md overflow-hidden bg-slate-100 border border-slate-200">
 									<img src={imgUrl} alt="Ground" class="w-full h-full object-cover" />
-									<button class="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity" on:click={() => removeExistingImage(i, 'ground')}><X class="w-3 h-3" /></button>
+									<button class="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity" onclick={() => removeExistingImage(i, 'ground')}><X class="w-3 h-3" /></button>
 								</div>
 							{/each}
 						</div>
@@ -263,7 +263,7 @@
 							{#each formData.images.environment as imgUrl, i}
 								<div class="relative group aspect-square rounded-md overflow-hidden bg-slate-100 border border-slate-200">
 									<img src={imgUrl} alt="Environment" class="w-full h-full object-cover" />
-									<button class="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity" on:click={() => removeExistingImage(i, 'environment')}><X class="w-3 h-3" /></button>
+									<button class="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity" onclick={() => removeExistingImage(i, 'environment')}><X class="w-3 h-3" /></button>
 								</div>
 							{/each}
 						</div>
@@ -279,7 +279,7 @@
 							{#each formData.images.technical as imgUrl, i}
 								<div class="relative group aspect-square rounded-md overflow-hidden bg-slate-100 border border-slate-200">
 									<img src={imgUrl} alt="Technical" class="w-full h-full object-cover" />
-									<button class="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity" on:click={() => removeExistingImage(i, 'technical')}><X class="w-3 h-3" /></button>
+									<button class="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity" onclick={() => removeExistingImage(i, 'technical')}><X class="w-3 h-3" /></button>
 								</div>
 							{/each}
 						</div>
@@ -295,7 +295,7 @@
 			{#if !lot.id.startsWith('temp-')}
 				<button 
 					class="px-4 py-2 text-sm font-medium text-red-600 bg-white border border-red-200 rounded-md hover:bg-red-50 transition-colors flex items-center justify-center"
-					on:click={handleDelete}
+					onclick={handleDelete}
 					disabled={isSaving}
 				>
 					<Trash2 class="w-4 h-4" />
@@ -304,7 +304,7 @@
 			
 			<button 
 				class="flex-1 px-4 py-2 text-sm font-medium text-white bg-brand-green rounded-md hover:bg-brand-green-light transition-colors flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
-				on:click={handleSave}
+				onclick={handleSave}
 				disabled={isSaving}
 			>
 				<Save class="w-4 h-4" />
