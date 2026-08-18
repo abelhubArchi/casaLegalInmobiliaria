@@ -6,6 +6,7 @@
 	import LotListSidebar from '$lib/components/admin/LotListSidebar.svelte';
 	import LotFormDrawer from '$lib/components/admin/LotFormDrawer.svelte';
 	import { PenTool, Save, ChevronLeft, Loader2 } from 'lucide-svelte';
+	import { getMapById, saveMap, uploadImage } from '$lib/firebase/db';
 
 	const mapId = $page.params.id;
 
@@ -22,32 +23,22 @@
 	let editingLot = $state(null);
 	let isSaving = $state(false);
 
-	onMount(() => {
-		const storedMaps = localStorage.getItem('casa_legal_maps');
-		if (storedMaps) {
-			const maps = JSON.parse(storedMaps);
-			const foundMap = maps.find(m => m.id === mapId);
-			if (foundMap) {
-				mapData = foundMap;
-				if (!mapData.lots) mapData.lots = [];
-			} else {
-				alert("El plano no existe localmente.");
-			}
+	onMount(async () => {
+		mapData = await getMapById(mapId);
+		if (mapData) {
+			if (!mapData.lots) mapData.lots = [];
 		} else {
-			alert("No hay planos guardados.");
+			alert("El plano no existe en la base de datos.");
 		}
 		loading = false;
 	});
 
-	function saveToLocal() {
-		const storedMaps = localStorage.getItem('casa_legal_maps');
-		if (storedMaps) {
-			let maps = JSON.parse(storedMaps);
-			const index = maps.findIndex(m => m.id === mapId);
-			if (index >= 0) {
-				maps[index] = mapData;
-				localStorage.setItem('casa_legal_maps', JSON.stringify(maps));
-			}
+	async function saveToFirebase() {
+		try {
+			await saveMap(mapData);
+		} catch (error) {
+			console.error("Error saving to Firebase:", error);
+			alert("Error al guardar en la nube.");
 		}
 	}
 
@@ -124,17 +115,16 @@
 		isSaving = true;
 
 		try {
-			// Convert all new images to Base64 per category
+			// Convert and upload all new images to Firebase Storage
 			const finalImages = { ...data.images };
 			
+			const tempLotId = editingLot.id.startsWith('temp-') ? 'lote-' + Date.now() : editingLot.id;
+
 			for (const [category, files] of Object.entries(newImages)) {
-				const uploadedUrls = await Promise.all(files.map(file => {
-					return new Promise((resolve, reject) => {
-						const reader = new FileReader();
-						reader.onloadend = () => resolve(reader.result);
-						reader.onerror = reject;
-						reader.readAsDataURL(file);
-					});
+				const uploadedUrls = await Promise.all(files.map(async (file, index) => {
+					// Use a unique path for each image
+					const imagePath = `maps/${mapId}/lots/${tempLotId}/${category}/${Date.now()}-${index}`;
+					return await uploadImage(imagePath, file);
 				}));
 				finalImages[category] = [...(finalImages[category] || []), ...uploadedUrls];
 			}
@@ -143,16 +133,13 @@
 			const finalLot = {
 				...editingLot,
 				...data,
-				images: finalImages
+				images: finalImages,
+				id: tempLotId
 			};
-
-			if (finalLot.id.startsWith('temp-')) {
-				finalLot.id = 'lote-' + Date.now();
-			}
 
 			// Update the lots array
 			let updatedLots = [...mapData.lots];
-			const existingIndex = updatedLots.findIndex(l => l.id === editingLot.id || (editingLot.id.startsWith('temp-') && l.id === finalLot.id));
+			const existingIndex = updatedLots.findIndex(l => l.id === editingLot.id || l.id === finalLot.id);
 			
 			if (existingIndex >= 0) {
 				updatedLots[existingIndex] = finalLot;
@@ -161,7 +148,7 @@
 			}
 
 			mapData.lots = updatedLots;
-			saveToLocal();
+			await saveToFirebase();
 
 			// Close and reset
 			isDrawerOpen = false;
@@ -182,7 +169,7 @@
 
 		try {
 			mapData.lots = mapData.lots.filter(l => l.id !== lotIdToDelete);
-			saveToLocal();
+			await saveToFirebase();
 			closeDrawer();
 		} catch (error) {
 			console.error("Error deleting lot:", error);

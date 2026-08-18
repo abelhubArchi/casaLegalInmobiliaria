@@ -1,6 +1,9 @@
 <script>
 	import { onMount } from 'svelte';
-	import { Plus, Map as MapIcon, Loader2, Image as ImageIcon } from 'lucide-svelte';
+	import { Plus, Map as MapIcon, Loader2, Image as ImageIcon, LogOut } from 'lucide-svelte';
+	import { getMaps, saveMap, uploadImage } from '$lib/firebase/db';
+	import { logout } from '$lib/firebase/auth';
+	import { goto } from '$app/navigation';
 
 	let maps = $state([]);
 	let loading = $state(true);
@@ -10,12 +13,11 @@
 		loadMaps();
 	});
 
-	function loadMaps() {
+	async function loadMaps() {
 		try {
-			const storedMaps = localStorage.getItem('casa_legal_maps');
-			if (storedMaps) {
-				maps = JSON.parse(storedMaps).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-			}
+			maps = await getMaps();
+			// Sort by created_at descending
+			maps.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 		} catch (error) {
 			console.error("Error loading maps:", error);
 		} finally {
@@ -33,31 +35,33 @@
 		isUploading = true;
 		
 		try {
-			// Convert image to Base64 for local storage
-			const reader = new FileReader();
-			reader.onloadend = () => {
-				const base_image_url = reader.result;
-				const newMapId = 'map-' + Date.now();
-				
-				const newMap = {
-					id: newMapId,
-					title,
-					created_at: new Date().toISOString(),
-					base_image_url,
-					lots: []
-				};
-
-				maps = [newMap, ...maps];
-				localStorage.setItem('casa_legal_maps', JSON.stringify(maps));
-				
-				window.location.href = `/admin/terrenos/${newMapId}`;
+			const newMapId = 'map-' + Date.now();
+			
+			// Upload image to Firebase Storage
+			const base_image_url = await uploadImage(`maps/${newMapId}/base_image`, file);
+			
+			const newMap = {
+				id: newMapId,
+				title,
+				created_at: new Date().toISOString(),
+				base_image_url,
+				lots: []
 			};
-			reader.readAsDataURL(file);
+
+			// Save to Firestore
+			await saveMap(newMap);
+			
+			goto(`/admin/terrenos/${newMapId}`);
 		} catch (error) {
 			console.error("Error creating map:", error);
 			alert("Error al crear el plano.");
 			isUploading = false;
 		}
+	}
+
+	async function handleLogout() {
+		await logout();
+		goto('/login');
 	}
 </script>
 
@@ -69,13 +73,21 @@
 				<p class="text-slate-500 mt-1">Módulo de Administración de Terrenos y Planos</p>
 			</div>
 			
-			<div class="relative">
+			<div class="flex items-center gap-4">
+				<button 
+					onclick={handleLogout}
+					class="text-slate-500 hover:text-red-600 transition-colors flex items-center gap-2 text-sm font-medium"
+				>
+					<LogOut class="w-4 h-4" />
+					Salir
+				</button>
+				<div class="relative">
 				<input 
 					type="file" 
 					accept="image/*" 
 					class="hidden" 
 					id="map-upload"
-					on:change={handleNewMap}
+					onchange={handleNewMap}
 					disabled={isUploading}
 				/>
 				<label 

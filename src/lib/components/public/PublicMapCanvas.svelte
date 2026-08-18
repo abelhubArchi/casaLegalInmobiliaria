@@ -14,22 +14,61 @@
 	let panY = $state(0);
 	let isPanning = $state(false);
 	let startPan = $state({ x: 0, y: 0 });
+	
+	// Multi-touch tracking for mobile zoom
+	let activePointers = new Map();
+	let initialDistance = 0;
+	let initialScale = 1;
 
-	function handlePointerDown(event) {
-		// Start panning for any mouse down in public view (except clicks on polygons which are captured by the polygon)
-		isPanning = true;
-		startPan = { x: event.clientX - panX, y: event.clientY - panY };
+	function getDistance(p1, p2) {
+		return Math.hypot(p1.clientX - p2.clientX, p1.clientY - p2.clientY);
 	}
 
-	function handlePointerMove(event) {
-		if (isPanning) {
-			panX = event.clientX - startPan.x;
-			panY = event.clientY - startPan.y;
+	function handlePointerDown(event) {
+		activePointers.set(event.pointerId, event);
+		
+		if (activePointers.size === 1) {
+			isPanning = true;
+			startPan = { x: event.clientX - panX, y: event.clientY - panY };
+		} else if (activePointers.size === 2) {
+			isPanning = false;
+			let pts = Array.from(activePointers.values());
+			initialDistance = getDistance(pts[0], pts[1]);
+			initialScale = scale;
 		}
 	}
 
-	function handlePointerUp() {
-		isPanning = false;
+	function handlePointerMove(event) {
+		if (activePointers.has(event.pointerId)) {
+			activePointers.set(event.pointerId, event);
+		}
+
+		if (activePointers.size === 1 && isPanning) {
+			panX = event.clientX - startPan.x;
+			panY = event.clientY - startPan.y;
+		} else if (activePointers.size === 2) {
+			let pts = Array.from(activePointers.values());
+			let currentDistance = getDistance(pts[0], pts[1]);
+			if (initialDistance > 0) {
+				let delta = currentDistance / initialDistance;
+				let newScale = initialScale * delta;
+				scale = Math.max(0.5, Math.min(newScale, 10));
+			}
+		}
+	}
+
+	function handlePointerUp(event) {
+		activePointers.delete(event.pointerId);
+		if (activePointers.size < 2) {
+			initialDistance = 0;
+		}
+		if (activePointers.size === 1) {
+			let remaining = Array.from(activePointers.values())[0];
+			startPan = { x: remaining.clientX - panX, y: remaining.clientY - panY };
+			isPanning = true;
+		} else if (activePointers.size === 0) {
+			isPanning = false;
+		}
 	}
 
 	function handleWheel(event) {
@@ -73,7 +112,7 @@
 	}
 </script>
 
-<svelte:window on:pointerup={handlePointerUp} />
+<svelte:window on:pointerup={handlePointerUp} on:pointercancel={handlePointerUp} />
 
 <div 
 	class="w-full h-full flex items-center justify-center bg-[#f8fafc] overflow-hidden cursor-grab active:cursor-grabbing touch-none select-none"

@@ -3,7 +3,8 @@
 	import { onMount } from 'svelte';
 	import PublicMapCanvas from '$lib/components/public/PublicMapCanvas.svelte';
 	import LotQuickView from '$lib/components/public/LotQuickView.svelte';
-	import { Loader2 } from 'lucide-svelte';
+	import SplashScreen from '$lib/components/public/SplashScreen.svelte';
+	import { getMapById } from '$lib/firebase/db';
 
 	const mapId = $page.params.mapId;
 
@@ -11,19 +12,12 @@
 	let loading = $state(true);
 	let selectedLot = $state(null);
 
-	onMount(() => {
-		const storedMaps = localStorage.getItem('casa_legal_maps');
-		if (storedMaps) {
-			const maps = JSON.parse(storedMaps);
-			const foundMap = maps.find(m => m.id === mapId);
-			if (foundMap) {
-				mapData = foundMap;
-				if (!mapData.lots) mapData.lots = [];
-			} else {
-				alert("El plano no existe.");
-			}
+	onMount(async () => {
+		mapData = await getMapById(mapId);
+		if (mapData) {
+			if (!mapData.lots) mapData.lots = [];
 		} else {
-			alert("No hay planos guardados.");
+			alert("El plano no existe.");
 		}
 		loading = false;
 	});
@@ -38,17 +32,17 @@
 </script>
 
 <svelte:head>
-	<title>{mapData ? mapData.title : 'Plano'} | CASA LEGAL INMOBILIARIA</title>
+	<title>{mapData ? mapData.title : 'Plano Interactivo'} | CASA LEGAL INMOBILIARIA</title>
+	<meta name="description" content={`Explora el plano interactivo del proyecto ${mapData?.title || ''}. Encuentra tu lote ideal y asegura tu patrimonio con Casa Legal.`} />
+	<meta property="og:title" content={`${mapData ? mapData.title : 'Plano Interactivo'} | CASA LEGAL`} />
+	<meta property="og:description" content="Visualiza la disponibilidad de lotes en tiempo real y encuentra el terreno perfecto para tu familia." />
+	<meta property="og:image" content={mapData?.base_image_url || 'https://casalegal.com/default-map.jpg'} />
+	<meta property="og:type" content="website" />
 </svelte:head>
 
-{#if loading}
-	<div class="w-full h-screen flex items-center justify-center bg-gradient-to-br from-brand-green-dark to-brand-green">
-		<div class="flex flex-col items-center gap-4">
-			<Loader2 class="w-12 h-12 text-brand-gold animate-spin" />
-			<p class="text-brand-gold font-medium tracking-widest text-sm uppercase">Cargando plano...</p>
-		</div>
-	</div>
-{:else if mapData}
+<SplashScreen isVisible={loading} message="Cargando los planos de tus sueños..." />
+
+{#if !loading && mapData}
 	<div class="fixed inset-0 w-full h-full bg-slate-900 overflow-hidden font-sans">
 		<!-- Elegant Header -->
 		<header class="absolute top-0 left-0 right-0 z-10 flex flex-col items-center justify-center pt-6 pb-12 pointer-events-none bg-gradient-to-b from-black/80 via-black/40 to-transparent">

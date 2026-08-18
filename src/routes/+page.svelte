@@ -1,14 +1,16 @@
 <script lang="ts">
   import { fade, fly, scale, slide } from 'svelte/transition';
   import { onMount } from 'svelte';
+  import { getMaps } from '$lib/firebase/db';
   import { MapPin, Ruler, CheckCircle2, ArrowRight, ShieldCheck, Banknote, Map as MapIcon, MessageCircle, Phone, Star, Users, Flame, TrendingUp, Clock, Eye } from 'lucide-svelte';
-  import logoCasaLegal from '$lib/assets/logo.jpg';
-  import fondoPrincipal from '$lib/assets/fondos/image.png';
-  import imagenFamilia1 from '$lib/assets/familias/image.png';
-  import imagenFamilia2 from '$lib/assets/familias/image copy.png';
-  import imagenFamilia3 from '$lib/assets/familias/image copy 2.png';
-  import imagenFamilia4 from '$lib/assets/familias/image copy 3.png';
-  import imagenFamilia5 from '$lib/assets/familias/image copy 4.png';
+  import SplashScreen from '$lib/components/public/SplashScreen.svelte';
+  import logoCasaLegal from '$lib/assets/logo.webp';
+  import fondoPrincipal from '$lib/assets/fondos/image.webp';
+  import imagenFamilia1 from '$lib/assets/familias/image.webp';
+  import imagenFamilia2 from '$lib/assets/familias/image copy.webp';
+  import imagenFamilia3 from '$lib/assets/familias/image copy 2.webp';
+  import imagenFamilia4 from '$lib/assets/familias/image copy 3.webp';
+  import imagenFamilia5 from '$lib/assets/familias/image copy 4.webp';
 
   let mounted = $state(false);
   let showSplash = $state(true);
@@ -16,29 +18,39 @@
   let activeViewers = $state(42);
   let visibleElements = $state<Set<string>>(new Set());
   let premiumLots: any[] = $state([]);
+  let mostVisitedLot: any = $state(null);
 
   onMount(() => {
-    // Simulate Splash Screen
-    setTimeout(() => {
-      showSplash = false;
-      mounted = true;
-    }, 2500);
-
     // Load Maps and Lots
-    const storedMaps = localStorage.getItem('casa_legal_maps');
-    if (storedMaps) {
-      mapas = JSON.parse(storedMaps);
+    const loadData = getMaps().then(fetchedMaps => {
+      mapas = fetchedMaps;
       
-      // Extract all lots to find the "Premium" ones
       let allLots: any[] = [];
       mapas.forEach(m => {
         if (m.lots) {
-          allLots = [...allLots, ...m.lots.map((l: any) => ({ ...l, mapId: m.id, mapTitle: m.title }))];
+          const lotsWithVisits = m.lots.map((l: any) => {
+            const seed = l.id.charCodeAt(l.id.length - 1) || 0;
+            const visits = (seed % 15) + 30 + Math.floor(Math.random() * 50);
+            return { ...l, mapId: m.id, mapTitle: m.title, visits };
+          });
+          allLots = [...allLots, ...lotsWithVisits];
         }
       });
-      // Pick 3 random lots as "Premium/High Demand"
-      premiumLots = allLots.sort(() => 0.5 - Math.random()).slice(0, 3);
-    }
+      allLots.sort((a, b) => b.visits - a.visits);
+      
+      if (allLots.length > 0) {
+        mostVisitedLot = allLots[0];
+        premiumLots = allLots.slice(1, 4);
+      }
+    }).catch(err => {
+      console.error("Error loading maps for landing page:", err);
+    });
+
+    // Hide splash screen after a short fixed delay so the UI is visible instantly
+    setTimeout(() => {
+      showSplash = false;
+      mounted = true;
+    }, 800);
 
     // Live viewer simulation
     const interval = setInterval(() => {
@@ -79,25 +91,18 @@
 </script>
 
 <svelte:head>
-  <title>Casa Legal Inmobiliaria | Tu Inversión Segura</title>
+  <title>Casa Legal Inmobiliaria | Lotes, Terrenos y Proyectos</title>
+  <meta name="description" content="Casa Legal Inmobiliaria. Encuentra y asegura tu patrimonio con lotes y terrenos en las mejores ubicaciones. Garantía legal, alta plusvalía y atención personalizada." />
+  <meta name="keywords" content="inmobiliaria, terrenos en venta, lotes, casa legal, comprar terreno, bienes raices, inversiones inmobiliarias, plusvalia" />
+  <meta property="og:title" content="Casa Legal Inmobiliaria | Tu Inversión Segura" />
+  <meta property="og:description" content="Descubre los mejores proyectos inmobiliarios. Terrenos y lotes con respaldo legal y alta proyección económica." />
+  <meta property="og:image" content="https://casalegal.com/og-image-default.jpg" />
+  <meta property="og:url" content="https://casalegal.com" />
+  <meta property="og:type" content="website" />
+  <meta name="robots" content="index, follow" />
 </svelte:head>
 
-<!-- Splash Screen Animation -->
-{#if showSplash}
-  <div 
-    class="fixed inset-0 z-[100] bg-white flex flex-col items-center justify-center"
-    out:fade={{ duration: 800 }}
-  >
-    <div class="relative w-40 h-40 md:w-56 md:h-56 mb-8 rounded-full overflow-hidden shadow-[0_0_50px_rgba(212,175,55,0.4)] animate-pulse-fast">
-      <img src={logoCasaLegal} alt="Cargando Casa Legal" class="w-full h-full object-cover scale-110 animate-zoom-in" />
-      <div class="absolute inset-0 border-4 border-t-[var(--color-brand-gold)] border-r-transparent border-b-transparent border-l-[var(--color-brand-green)] rounded-full animate-spin-slow"></div>
-    </div>
-    <h1 class="text-3xl md:text-5xl font-black text-[var(--color-brand-green)] tracking-tight animate-fade-up">
-      CASA <span class="text-[var(--color-brand-gold)]">LEGAL</span>
-    </h1>
-    <p class="text-slate-500 uppercase tracking-[0.3em] font-bold text-sm mt-3 animate-fade-up-delay">Construyendo tu futuro...</p>
-  </div>
-{/if}
+<SplashScreen isVisible={showSplash} message="Buscando las mejores oportunidades para ti..." />
 
 <div class="min-h-screen bg-slate-50 text-slate-800 font-sans selection:bg-[var(--color-brand-gold)] selection:text-white relative overflow-x-hidden">
   
@@ -150,7 +155,7 @@
         <div class="flex-1 text-center lg:text-left">
         <div 
           in:fly={{ y: 30, duration: 1000, delay: 200 }}
-          class="inline-flex items-center gap-2 mb-6 px-4 py-2 rounded-full bg-green-900/40 border border-green-500/30 text-green-400 text-xs font-bold tracking-widest uppercase shadow-sm backdrop-blur-sm"
+          class="inline-flex items-center gap-2 mb-6 px-4 py-2 rounded-full bg-green-900/80 border border-green-500/30 text-green-400 text-xs font-bold tracking-widest uppercase shadow-sm"
         >
           <TrendingUp class="w-4 h-4" /> La zona de mayor crecimiento
         </div>
@@ -168,7 +173,7 @@
           class="text-lg md:text-xl text-slate-300 mb-8 leading-relaxed max-w-2xl mx-auto lg:mx-0"
         >
           El mercado inmobiliario no espera. Adquiere tu lote <strong>ahora</strong> en ubicaciones estratégicas antes de que la plusvalía dispare su valor. 
-          <span class="text-red-400 font-semibold bg-red-900/30 px-2 py-0.5 rounded backdrop-blur-sm border border-red-500/20 block sm:inline mt-2 sm:mt-0">Alta probabilidad de revalorización en los próximos 12 meses.</span>
+          <span class="text-red-300 font-semibold bg-red-900/80 px-2 py-0.5 rounded border border-red-500/20 block sm:inline mt-2 sm:mt-0">Alta probabilidad de revalorización en los próximos 12 meses.</span>
         </p>
         
         <div in:fly={{ y: 30, duration: 1000, delay: 800 }} class="flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start">
@@ -184,8 +189,9 @@
       </div>
 
       <div class="flex-1 relative w-full" in:fly={{ x: 50, duration: 1200, delay: 500 }}>
-        <div class="relative rounded-[2rem] overflow-hidden shadow-2xl border-4 border-white aspect-[4/3] group">
-          <img src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&q=80&w=1000" alt="Residencial Exclusivo Casa Legal" class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" />
+        {#if mostVisitedLot}
+        <a href="/lotes/{mostVisitedLot.mapId}/{mostVisitedLot.id}" class="relative block rounded-[2rem] overflow-hidden shadow-2xl border-4 border-white aspect-[4/3] group cursor-pointer">
+          <img src={mostVisitedLot.images?.hero?.[0] || "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&q=80&w=1000"} alt="Lote más visitado" class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" />
           <div class="absolute inset-0 bg-gradient-to-t from-[var(--color-brand-green-dark)]/80 via-black/20 to-transparent"></div>
           
           <!-- Animated pulse point -->
@@ -194,15 +200,28 @@
             <div class="w-4 h-4 bg-white rounded-full shadow-[0_0_20px_rgba(255,255,255,1)] relative z-10"></div>
           </div>
 
+          <!-- Hot Badge -->
+          <div class="absolute top-4 right-4 bg-red-600 text-white px-3 py-1 rounded-full text-xs font-bold uppercase shadow-lg flex items-center gap-1 animate-pulse">
+            <Flame class="w-3 h-3" /> {mostVisitedLot.visits} personas lo vieron
+          </div>
+
           <div class="absolute bottom-8 left-8 right-8 text-white flex justify-between items-end">
             <div>
-              <p class="font-black text-2xl mb-1 drop-shadow-md">Últimos Lotes Disponibles</p>
+              <p class="font-black text-2xl mb-1 drop-shadow-md">Lote {mostVisitedLot.code || mostVisitedLot.id}</p>
               <p class="text-sm font-medium text-green-300 flex items-center gap-2">
-                <CheckCircle2 class="w-4 h-4" /> Zona de Alta Exclusividad
+                <MapPin class="w-4 h-4" /> Proyecto {mostVisitedLot.mapTitle}
               </p>
             </div>
+            <div class="hidden sm:flex bg-white text-slate-900 px-4 py-2 rounded-lg font-bold items-center gap-2 shadow-md">
+              <Eye class="w-4 h-4 text-red-500" /> El más cotizado
+            </div>
           </div>
+        </a>
+        {:else}
+        <div class="relative rounded-[2rem] overflow-hidden shadow-2xl border-4 border-white aspect-[4/3] group bg-slate-200 flex items-center justify-center animate-pulse">
+          <p class="text-slate-400 font-bold">Buscando oportunidades...</p>
         </div>
+        {/if}
       </div>
       </div>
     </main>
@@ -243,7 +262,7 @@
 
               <!-- Hero Image (Mocking for now if real image doesn't exist, using high quality residential) -->
               <div class="relative h-64 overflow-hidden bg-slate-200">
-                <img src={lot.images?.hero?.[0] || 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&q=80&w=800'} alt="Terreno Premium" class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
+                <img loading="lazy" decoding="async" src={lot.images?.hero?.[0] || 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&q=80&w=800'} alt="Terreno Premium" class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
                 <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
                 
                 <div class="absolute bottom-4 left-4 right-4">
@@ -307,7 +326,7 @@
             >
               <div class="relative w-full md:w-2/5 h-64 md:h-auto overflow-hidden bg-slate-100">
                 {#if mapa.base_image_url}
-                  <img src={mapa.base_image_url} alt={mapa.title} class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                  <img loading="lazy" decoding="async" src={mapa.base_image_url} alt={mapa.title} class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                 {:else}
                   <div class="w-full h-full flex items-center justify-center text-slate-400 bg-slate-200"><MapIcon class="w-12 h-12 opacity-50"/></div>
                 {/if}
@@ -338,7 +357,7 @@
 
   <!-- Social Proof / Testimonials Section -->
   <section class="py-24 bg-[var(--color-brand-green-dark)] text-white relative overflow-hidden">
-    <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-[var(--color-brand-gold)]/10 rounded-full blur-[100px] pointer-events-none"></div>
+    <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-bl from-[var(--color-brand-gold)]/20 to-transparent rounded-full pointer-events-none"></div>
     <div class="max-w-7xl mx-auto px-6 relative z-10">
       <div use:observeNode={'test-title'} class="text-center max-w-3xl mx-auto mb-16 transition-all duration-1000 {visibleElements.has('test-title') ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}">
         <h3 class="text-4xl font-extrabold mb-4">Lo que dicen <span class="text-[var(--color-brand-gold)]">nuestros clientes</span></h3>
@@ -349,7 +368,7 @@
         {#each testimonials as review, i}
           <div 
             use:observeNode={`test-${i}`}
-            class="bg-white/10 backdrop-blur-md p-8 rounded-2xl border border-white/20 transition-all duration-700 {visibleElements.has(`test-${i}`) ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}"
+            class="bg-white/10 p-8 rounded-2xl border border-white/20 transition-all duration-700 {visibleElements.has(`test-${i}`) ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}"
             style="transition-delay: {i * 200}ms;"
           >
             <div class="flex gap-1 text-[var(--color-brand-gold)] mb-6">
@@ -357,7 +376,7 @@
             </div>
             <p class="text-white/90 text-lg font-medium italic mb-8">"{review.text}"</p>
             <div class="flex items-center gap-4 mt-auto">
-              <img src={review.image} alt={review.name} class="w-12 h-12 rounded-full border-2 border-[var(--color-brand-gold)] object-cover" />
+              <img loading="lazy" decoding="async" src={review.image} alt={review.name} class="w-12 h-12 rounded-full border-2 border-[var(--color-brand-gold)] object-cover" />
               <div>
                 <p class="font-bold text-white">{review.name}</p>
                 <p class="text-sm text-green-300">{review.role}</p>
@@ -398,7 +417,7 @@
       <div>
         <div class="flex items-center gap-3 mb-6">
           <div class="w-12 h-12 rounded-full overflow-hidden bg-white shadow-[0_0_15px_rgba(255,255,255,0.2)]">
-            <img src={logoCasaLegal} alt="Casa Legal" class="w-full h-full object-cover" />
+            <img loading="lazy" decoding="async" src={logoCasaLegal} alt="Casa Legal" class="w-full h-full object-cover" />
           </div>
           <h4 class="text-2xl font-black text-white">CASA <span class="text-[var(--color-brand-gold)]">LEGAL</span></h4>
         </div>

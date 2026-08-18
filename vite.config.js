@@ -18,5 +18,8 @@ export default defineConfig({
 			// See https://svelte.dev/docs/kit/adapters for more information about adapters.
 			adapter: adapter()
 		})
-	]
+	],
+	optimizeDeps: {
+		include: ['lucide-svelte', 'firebase/app', 'firebase/firestore', 'firebase/storage', 'firebase/auth']
+	}
 });

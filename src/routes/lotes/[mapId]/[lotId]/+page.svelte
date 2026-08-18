@@ -1,8 +1,10 @@
 <script lang="ts">
   import { page } from '$app/stores';
   import { onMount } from 'svelte';
+  import { getMapById } from '$lib/firebase/db';
   import { ChevronLeft, TrendingUp, Users, MessageCircle, Ruler, Compass, CheckCircle2, Home, ArrowRight, Eye, ShieldCheck, MapPin, Image as ImageIcon } from 'lucide-svelte';
   import { fade, fly } from 'svelte/transition';
+  import SplashScreen from '$lib/components/public/SplashScreen.svelte';
 
   const { mapId, lotId } = $page.params;
 
@@ -21,20 +23,15 @@
   // Gallery tabs
   let activeTab = $state('ground');
 
-  onMount(() => {
-    const storedMaps = localStorage.getItem('casa_legal_maps');
-    if (storedMaps) {
-      const maps = JSON.parse(storedMaps);
-      const foundMap = maps.find((m: any) => m.id === mapId);
-      if (foundMap) {
-        mapData = foundMap;
-        lot = foundMap.lots?.find((l: any) => l.id === lotId);
-        
-        if (lot) {
-          const seed = lot.id.charCodeAt(lot.id.length - 1) || 0;
-          viewersCount = (seed % 15) + 12;
-          projectedValue = (lot.price || 50000) * 1.35;
-        }
+  onMount(async () => {
+    mapData = await getMapById(mapId);
+    if (mapData) {
+      lot = mapData.lots?.find((l: any) => l.id === lotId);
+      
+      if (lot) {
+        const seed = lot.id.charCodeAt(lot.id.length - 1) || 0;
+        viewersCount = (seed % 15) + 12;
+        projectedValue = (lot.price || 50000) * 1.35;
       }
     }
     loading = false;
@@ -92,14 +89,17 @@
 </script>
 
 <svelte:head>
-  <title>{lot ? `Lote ${lot.code || lot.id}` : 'Lote'} | Casa Legal</title>
+  <title>{lot ? `Lote ${lot.code || lot.id}` : 'Lote Exclusivo'} | Casa Legal</title>
+  <meta name="description" content={lot?.description || `Descubre los detalles del Lote ${lot?.code || ''} en el proyecto ${mapData?.title || ''}. Asegura tu futuro con Casa Legal Inmobiliaria.`} />
+  <meta property="og:title" content={`${lot ? `Lote ${lot.code || lot.id}` : 'Lote Exclusivo'} | Casa Legal`} />
+  <meta property="og:description" content={lot?.description || "Asegura tu inversión con este excelente lote. ¡La oportunidad que estabas buscando!"} />
+  <meta property="og:image" content={lot?.images?.hero?.[0] || 'https://casalegal.com/default-lot.jpg'} />
+  <meta property="og:type" content="product" />
 </svelte:head>
 
-{#if loading}
-  <div class="min-h-screen bg-slate-50 flex flex-col items-center justify-center">
-    <div class="w-16 h-16 border-4 border-slate-200 border-t-[var(--color-brand-green)] rounded-full animate-spin"></div>
-  </div>
-{:else if lot}
+<SplashScreen isVisible={loading} message="Preparando detalles del lote..." />
+
+{#if !loading && lot}
   <div class="bg-slate-50 min-h-screen text-slate-900 font-sans overflow-x-hidden selection:bg-[var(--color-brand-gold)] selection:text-white">
     
     <!-- Urgent Banner -->
@@ -269,7 +269,7 @@
     <!-- Dream Home Vision (Proyección) -->
     <section class="py-24 bg-[var(--color-brand-green-dark)] relative overflow-hidden">
       <!-- Decorative circles -->
-      <div class="absolute -right-20 -top-20 w-96 h-96 bg-[var(--color-brand-gold)]/10 rounded-full blur-3xl"></div>
+      <div class="absolute -right-20 -top-20 w-96 h-96 bg-gradient-to-bl from-[var(--color-brand-gold)]/20 to-transparent rounded-full"></div>
       
       <div class="max-w-6xl mx-auto px-6">
         <div class="flex flex-col lg:flex-row items-center gap-16">
