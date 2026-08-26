@@ -1,24 +1,44 @@
 <script>
     import { onMount } from 'svelte';
-    import { fade, fly } from 'svelte/transition';
+    import { fade, fly, slide } from 'svelte/transition';
     import { browser } from '$app/environment';
     import gsap from 'gsap';
     import { ScrollTrigger } from 'gsap/ScrollTrigger';
     import { user } from '$lib/firebase/auth';
-    import { getPageContent, savePageContent } from '$lib/firebase/db';
+    import { getPageContent, savePageContent, getHugoNews } from '$lib/firebase/db';
     import SocialAndLocations from '$lib/components/public/SocialAndLocations.svelte';
+    import { ArrowRight, BookOpen, GraduationCap, Award, Briefcase, FileText } from 'lucide-svelte';
     
     // assets
     import profileImg from './assets/hugosantosperfil.png';
     import topLogoImg from './assets/hqsantosquelca.png';
+    import hqImg from './assets/hq.png';
 
     let mounted = $state(false);
+    let showSplash = $state(true);
+    let loading = $state(true);
+    let posts = $state([]);
     
     let content = $state({
         biografia: "Un líder visionario comprometido con la excelencia. Descubre la historia, los valores y el recorrido profesional que han forjado una trayectoria de alto impacto.",
         proyectos: "Iniciativas que transforman el entorno. Explora un portafolio exclusivo de desarrollos inmobiliarios y soluciones legales innovadoras.",
-        vision: "La verdadera innovación nace en la intersección de la audacia y la precisión legal. Forjamos el futuro del desarrollo urbano garantizando la certeza jurídica en cada paso."
+        vision: "La verdadera innovación nace en la intersección de la audacia y la precisión legal. Forjamos el futuro del desarrollo urbano garantizando la certeza jurídica en cada paso.",
+        
+        trayectoriaTitle: "Trayectoria Académica y Profesional",
+        trayectoria: [
+            { titulo: "Doctorado en Derecho Constitucional", institucion: "Universidad Mayor de San Andrés", año: "2018", icono: "GraduationCap" },
+            { titulo: "Magíster en Derecho Civil y Corporativo", institucion: "Universidad Andina Simón Bolívar", año: "2015", icono: "Award" },
+            { titulo: "Fundador y CEO", institucion: "Casa Legal Inmobiliaria", año: "Actualidad", icono: "Briefcase" }
+        ],
+        
+        librosTitle: "Publicaciones y Libros",
+        libros: [
+            { titulo: "Tratado de Derecho Urbano y Saneamiento", descripcion: "Una guía completa sobre la regularización de propiedades y el marco jurídico del desarrollo inmobiliario en Bolivia.", portada: "https://images.unsplash.com/photo-1589829085413-56de8ae18c73?q=80&w=800&auto=format&fit=crop", enlace: "#" }
+        ],
+        
+        blogTitle: "Últimos Artículos y Reflexiones"
     });
+    
     let isSaving = $state(false);
 
     async function saveChanges() {
@@ -36,11 +56,23 @@
     onMount(async () => {
         mounted = true;
         
-        // Fetch Content
-        const savedContent = await getPageContent('hugo_page_content', 'main_texts');
+        // Fetch Content & Posts in parallel
+        const [savedContent, fetchedPosts] = await Promise.all([
+            getPageContent('hugo_page_content', 'main_texts'),
+            getHugoNews()
+        ]);
+        
         if (savedContent) {
             content = { ...content, ...savedContent };
         }
+        if (fetchedPosts) {
+            posts = fetchedPosts.slice(0, 3); // Solo los últimos 3
+        }
+        
+        loading = false;
+        setTimeout(() => {
+            if (!loading) showSplash = false;
+        }, 2000);
 
         if (browser) {
             gsap.registerPlugin(ScrollTrigger);
@@ -132,6 +164,20 @@
 <svelte:head>
     <title>Hugo Santos Quelca</title>
 </svelte:head>
+
+<!-- SPLASH SCREEN -->
+{#if showSplash}
+    <div out:fade={{ duration: 800 }} class="fixed inset-0 z-[100] bg-[#050505] flex flex-col items-center justify-center">
+        <div class="w-48 md:w-64 animate-pulse">
+            <img src={hqImg} alt="Hugo Santos" class="w-full h-auto object-contain drop-shadow-[0_0_20px_rgba(255,255,255,0.3)]" />
+        </div>
+        <div class="mt-8 flex gap-2">
+            <div class="w-2 h-2 rounded-full bg-[#ffd700] animate-bounce" style="animation-delay: 0s"></div>
+            <div class="w-2 h-2 rounded-full bg-[#ffffff] animate-bounce" style="animation-delay: 0.2s"></div>
+            <div class="w-2 h-2 rounded-full bg-[#00ff44] animate-bounce" style="animation-delay: 0.4s"></div>
+        </div>
+    </div>
+{/if}
 
 <!-- Admin Floating Save Button -->
 {#if $user}
@@ -296,6 +342,147 @@
             </div>
         </div>
     </div>
+</div>
+
+<!-- ADDITIONAL CONTENT (BELOW GSAP PARALLAX) -->
+<div class="relative z-20 bg-[#050505] w-full overflow-hidden shadow-[0_-20px_50px_rgba(0,0,0,0.8)]">
+    
+    <!-- Trayectoria Académica y Profesional -->
+    <section class="py-24 px-6 md:px-12 max-w-7xl mx-auto border-t border-zinc-900 mt-10">
+        <div class="text-center mb-16">
+            <h2 class="text-3xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#ffd700] to-zinc-400 uppercase tracking-widest">
+                {#if $user}
+                    <span contenteditable="true" bind:textContent={content.trayectoriaTitle} class="border-b border-dashed border-[#ffd700] focus:outline-none block"></span>
+                {:else}
+                    {content.trayectoriaTitle}
+                {/if}
+            </h2>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {#each content.trayectoria as item, i}
+                <div class="bg-zinc-900/50 backdrop-blur-md border border-zinc-800 rounded-3xl p-8 hover:border-[#00ff44] hover:shadow-[0_0_20px_rgba(0,255,68,0.2)] transition-all group text-center">
+                    <div class="w-16 h-16 rounded-full bg-black border border-zinc-700 flex items-center justify-center mx-auto mb-6 group-hover:border-[#00ff44] group-hover:text-[#00ff44] text-zinc-400 transition-colors">
+                        {#if item.icono === 'GraduationCap'}<GraduationCap class="w-8 h-8"/>
+                        {:else if item.icono === 'Award'}<Award class="w-8 h-8"/>
+                        {:else}<Briefcase class="w-8 h-8"/>{/if}
+                    </div>
+                    
+                    <span class="text-[#00ff44] text-xs font-black uppercase tracking-widest mb-3 block">
+                        {#if $user}<span contenteditable="true" bind:textContent={content.trayectoria[i].año} class="border-b border-dashed border-[#00ff44] focus:outline-none"></span>{:else}{item.año}{/if}
+                    </span>
+                    
+                    <h3 class="text-xl font-bold text-white mb-2">
+                        {#if $user}<span contenteditable="true" bind:textContent={content.trayectoria[i].titulo} class="border-b border-dashed border-zinc-500 focus:outline-none"></span>{:else}{item.titulo}{/if}
+                    </h3>
+                    
+                    <p class="text-zinc-400 font-light text-sm">
+                        {#if $user}<span contenteditable="true" bind:textContent={content.trayectoria[i].institucion} class="border-b border-dashed border-zinc-500 focus:outline-none"></span>{:else}{item.institucion}{/if}
+                    </p>
+                </div>
+            {/each}
+        </div>
+    </section>
+
+    <!-- Libros Publicados -->
+    <section class="py-24 px-6 md:px-12 max-w-7xl mx-auto border-t border-zinc-900">
+        <div class="text-center mb-16">
+            <h2 class="text-3xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#00ff44] to-zinc-400 uppercase tracking-widest">
+                {#if $user}
+                    <span contenteditable="true" bind:textContent={content.librosTitle} class="border-b border-dashed border-[#00ff44] focus:outline-none block"></span>
+                {:else}
+                    {content.librosTitle}
+                {/if}
+            </h2>
+        </div>
+        
+        <div class="flex flex-col gap-12">
+            {#each content.libros as libro, i}
+                <div class="flex flex-col md:flex-row bg-zinc-900/30 backdrop-blur-sm border border-zinc-800 rounded-3xl overflow-hidden group hover:border-[#ffd700] transition-colors">
+                    <div class="w-full md:w-1/3 h-[400px] md:h-auto relative overflow-hidden bg-zinc-800">
+                        <img src={libro.portada} alt={libro.titulo} class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-80 group-hover:opacity-100" />
+                        <div class="absolute inset-0 bg-gradient-to-t from-black to-transparent"></div>
+                        {#if $user}
+                            <button onclick={() => { const url = prompt('URL de portada:', libro.portada); if (url) content.libros[i].portada = url; }} class="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity text-white font-bold backdrop-blur-sm">Cambiar Portada</button>
+                        {/if}
+                    </div>
+                    
+                    <div class="w-full md:w-2/3 p-10 md:p-16 flex flex-col justify-center">
+                        <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#ffd700]/20 text-[#ffd700] text-xs font-black tracking-widest uppercase mb-6 w-max">
+                            <BookOpen class="w-4 h-4" /> Publicación Destacada
+                        </div>
+                        <h3 class="text-3xl md:text-4xl text-white font-bold mb-6 font-serif">
+                            {#if $user}<span contenteditable="true" bind:textContent={content.libros[i].titulo} class="border-b border-dashed border-zinc-500 focus:outline-none block"></span>{:else}{libro.titulo}{/if}
+                        </h3>
+                        <p class="text-zinc-400 text-lg leading-relaxed mb-8">
+                            {#if $user}<span contenteditable="true" bind:textContent={content.libros[i].descripcion} class="border-b border-dashed border-zinc-500 focus:outline-none block w-full h-full"></span>{:else}{libro.descripcion}{/if}
+                        </p>
+                        
+                        <a href={libro.enlace} class="text-[#00ff44] font-bold uppercase tracking-widest text-sm flex items-center gap-2 hover:text-white transition-colors w-max">
+                            Descubrir más <ArrowRight class="w-4 h-4" />
+                        </a>
+                    </div>
+                </div>
+            {/each}
+        </div>
+    </section>
+
+    <!-- Blog Feed -->
+    <section class="py-24 px-6 md:px-12 max-w-7xl mx-auto border-t border-zinc-900">
+        <div class="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
+            <div>
+                <h2 class="text-3xl md:text-5xl font-black text-white uppercase tracking-widest font-serif">
+                    {#if $user}
+                        <span contenteditable="true" bind:textContent={content.blogTitle} class="border-b border-dashed border-zinc-500 focus:outline-none block"></span>
+                    {:else}
+                        {content.blogTitle}
+                    {/if}
+                </h2>
+            </div>
+            <a href="/hugosantosquelca/blog" class="px-6 py-3 rounded-full border border-zinc-700 text-zinc-300 hover:bg-white hover:text-black transition-colors text-xs font-black uppercase tracking-widest flex items-center gap-2 whitespace-nowrap">
+                Ir al Blog <ArrowRight class="w-4 h-4" />
+            </a>
+        </div>
+        
+        {#if posts.length === 0}
+            <div class="text-center py-20 bg-zinc-900/50 rounded-3xl border border-zinc-800">
+                <p class="text-zinc-500">Pronto habrán nuevos artículos disponibles.</p>
+            </div>
+        {:else}
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                {#each posts as post}
+                    <a href="/hugosantosquelca/blog/{post.id}" class="group bg-zinc-900/50 border border-zinc-800 rounded-2xl overflow-hidden hover:border-[#00ff44]/50 transition-colors block flex flex-col">
+                        <div class="w-full h-48 relative overflow-hidden bg-black">
+                            {#if post.coverImage}
+                                <img src={post.coverImage} alt={post.title} class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-80 group-hover:opacity-100" />
+                            {:else}
+                                <div class="w-full h-full flex items-center justify-center text-zinc-700 bg-zinc-950">
+                                    <FileText class="w-12 h-12" />
+                                </div>
+                            {/if}
+                            <div class="absolute inset-0 bg-gradient-to-t from-[#050505] to-transparent opacity-80"></div>
+                            <div class="absolute bottom-4 left-4 right-4">
+                                <span class="text-[10px] text-[#00ff44] uppercase tracking-widest font-bold">
+                                    {post.createdAt ? new Date(post.createdAt).toLocaleDateString('es-ES', { month: 'long', day: 'numeric', year: 'numeric' }) : 'Reciente'}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="p-6 flex flex-col flex-grow">
+                            <h3 class="text-lg font-bold mb-3 text-zinc-200 group-hover:text-white transition-colors line-clamp-2">
+                                {post.title}
+                            </h3>
+                            <p class="text-zinc-500 text-sm line-clamp-3 mb-6 flex-grow">
+                                {post.excerpt || "Haz clic para leer el artículo completo..."}
+                            </p>
+                            <div class="text-[#ffd700] text-xs font-black uppercase tracking-widest flex items-center gap-2 mt-auto">
+                                Leer más <ArrowRight class="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+                            </div>
+                        </div>
+                    </a>
+                {/each}
+            </div>
+        {/if}
+    </section>
 </div>
 
 <SocialAndLocations />
