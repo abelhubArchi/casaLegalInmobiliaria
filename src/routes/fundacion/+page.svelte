@@ -8,6 +8,7 @@
     Scale, Users, Briefcase, Building, ChevronDown, CheckCircle2, 
     MapPin, Phone, Clock, ArrowRight, Save, FileText, Shield, Award, Star
   } from 'lucide-svelte';
+  import SocialAndLocations from '$lib/components/public/SocialAndLocations.svelte';
 
   // State
   let showSplash = $state(true);
@@ -537,60 +538,8 @@
         </div>
     </section>
 
-    <!-- Locations Section -->
-    <section id="ubicaciones" class="py-24 px-6 bg-[#0E1C14]/95 backdrop-blur-2xl text-white overflow-hidden relative shadow-[0_-20px_50px_rgba(0,0,0,0.1)]">
-        <!-- Golden dots for dark background -->
-        <div class="absolute inset-0 z-0 opacity-10 pointer-events-none" style="background-image: radial-gradient(#C5A059 1px, transparent 1px); background-size: 30px 30px; animation: moveDots 50s linear infinite;"></div>
-        <div class="max-w-7xl mx-auto relative z-10">
-            <div class="text-center mb-16 max-w-2xl mx-auto">
-                <span class="text-[#4EBA8A] text-sm font-bold tracking-widest uppercase block mb-2">
-                    {#if isAdmin}
-                        <span contenteditable="true" bind:textContent={content.locationsSubtitle} class="border-b-2 border-dashed border-[#C5A059] focus:outline-none focus:bg-white/10 p-1 rounded transition-colors"></span>
-                    {:else}
-                        <span>{content.locationsSubtitle}</span>
-                    {/if}
-                </span>
-                <h2 class="text-4xl sm:text-5xl text-white font-bold mb-4" style="font-family: 'Cinzel', serif;">
-                    {#if isAdmin}
-                        <span contenteditable="true" bind:textContent={content.locationsTitle} class="border-b-2 border-dashed border-[#C5A059] focus:outline-none focus:bg-white/10 p-1 rounded transition-colors"></span>
-                    {:else}
-                        <span>{content.locationsTitle}</span>
-                    {/if}
-                </h2>
-                <p class="text-gray-400 text-lg">
-                    {#if isAdmin}
-                        <span contenteditable="true" bind:textContent={content.locationsDesc} class="border-b-2 border-dashed border-[#C5A059] focus:outline-none focus:bg-white/10 p-1 rounded transition-colors block"></span>
-                    {:else}
-                        <span class="block">{content.locationsDesc}</span>
-                    {/if}
-                </p>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-                {#each content.locations as loc, i}
-                <div use:appearOnScroll={i * 150} class="bg-white/5 border border-white/10 rounded-3xl p-8 hover:bg-white/10 hover:-translate-y-1 transition-all duration-300">
-                    <MapPin class="w-8 h-8 text-[#C5A059] mb-4" />
-                    <h3 class="text-2xl font-bold mb-2 text-white" style="font-family: 'Cinzel', serif;">
-                        {#if isAdmin}
-                            <span contenteditable="true" bind:textContent={content.locations[i].name} class="border-b border-dashed border-gray-400 focus:outline-none block"></span>
-                        {:else}
-                            {loc.name}
-                        {/if}
-                    </h3>
-                    <p class="text-gray-400 mb-6 font-medium leading-relaxed">
-                        {#if isAdmin}
-                            <span contenteditable="true" bind:textContent={content.locations[i].address} class="border-b border-dashed border-gray-400 focus:outline-none block"></span>
-                        {:else}
-                            {loc.address}
-                        {/if}
-                    </p>
-                    <a href="https://maps.google.com" target="_blank" class="text-[#4EBA8A] font-bold text-sm uppercase tracking-wider flex items-center gap-2 hover:text-white transition-colors">
-                        Ver en Mapa <ArrowRight class="w-4 h-4" />
-                    </a>
-                </div>
-                {/each}
-            </div>
-        </div>
-    </section>
+    <!-- Locations & Social Network Section -->
+    <SocialAndLocations />
 
     <!-- FAQ Section -->
     <section id="faq" class="py-24 px-6 max-w-4xl mx-auto border-t border-gray-100">

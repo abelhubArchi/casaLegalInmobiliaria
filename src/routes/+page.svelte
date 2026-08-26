@@ -4,6 +4,7 @@
   import { getMaps } from '$lib/firebase/db';
   import { MapPin, Ruler, CheckCircle2, ArrowRight, ShieldCheck, Banknote, Map as MapIcon, MessageCircle, Phone, Star, Users, Flame, TrendingUp, Clock, Eye } from 'lucide-svelte';
   import SplashScreen from '$lib/components/public/SplashScreen.svelte';
+  import SocialAndLocations from '$lib/components/public/SocialAndLocations.svelte';
   import logoCasaLegal from '$lib/assets/logo.webp';
   import fondoPrincipal from '$lib/assets/fondos/image.webp';
   import imagenFamilia1 from '$lib/assets/familias/image.webp';
@@ -410,6 +411,8 @@
       </div>
     </div>
   </section>
+
+  <SocialAndLocations />
 
   <!-- Footer -->
   <footer class="bg-slate-900 text-white pt-20 pb-10 border-t-[6px] border-[var(--color-brand-green)]">

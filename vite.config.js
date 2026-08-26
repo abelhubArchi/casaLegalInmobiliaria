@@ -21,5 +21,8 @@ export default defineConfig({
 	],
 	optimizeDeps: {
 		include: ['lucide-svelte', 'firebase/app', 'firebase/firestore', 'firebase/storage', 'firebase/auth']
+	},
+	ssr: {
+		noExternal: ['gsap']
 	}
 });

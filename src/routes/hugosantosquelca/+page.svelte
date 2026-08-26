@@ -3,9 +3,10 @@
     import { fade, fly } from 'svelte/transition';
     import { browser } from '$app/environment';
     import gsap from 'gsap';
-    import ScrollTrigger from 'gsap/dist/ScrollTrigger';
+    import { ScrollTrigger } from 'gsap/ScrollTrigger';
     import { user } from '$lib/firebase/auth';
     import { getPageContent, savePageContent } from '$lib/firebase/db';
+    import SocialAndLocations from '$lib/components/public/SocialAndLocations.svelte';
     
     // assets
     import profileImg from './assets/hugosantosperfil.png';
@@ -296,6 +297,8 @@
         </div>
     </div>
 </div>
+
+<SocialAndLocations />
 
 <style>
     /* Aseguramos que el body principal también sea oscuro */
