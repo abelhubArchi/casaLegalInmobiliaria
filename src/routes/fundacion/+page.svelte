@@ -6,7 +6,7 @@
   import FundacionSplashScreen from '$lib/components/public/FundacionSplashScreen.svelte';
   import { 
     Scale, Users, Briefcase, Building, ChevronDown, CheckCircle2, 
-    MapPin, Phone, Clock, ArrowRight, Save, FileText, Shield, Award, Star
+    MapPin, Phone, Clock, ArrowRight, Save, FileText, Shield, Award, Star, X
   } from 'lucide-svelte';
   import SocialAndLocations from '$lib/components/public/SocialAndLocations.svelte';
 
@@ -16,6 +16,7 @@
   let activeAccordion = $state<number | null>(null);
   let scrollY = $state(0);
   let newsList = $state<any[]>([]);
+  let selectedCategory = $state<string | null>(null);
   
   // Auth & Admin
   let isAdmin = $derived(!!$user);
@@ -176,28 +177,48 @@
 
 <div class="bg-white text-gray-800 font-sans selection:bg-[#C5A059] selection:text-white relative overflow-x-hidden min-h-screen">
     <!-- Navbar -->
-    <header class="fixed top-0 w-full z-40 bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-sm transition-all duration-300">
-        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-            <a href="#inicio" class="flex items-center gap-3 group">
-                <div class="w-12 h-12 bg-white border border-[#C5A059] rounded-xl p-1 flex items-center justify-center shadow-sm group-hover:scale-105 transition-all overflow-hidden">
-                    <img src="/src/lib/assets/fundacion/fundacionlogo.jpeg" alt="Logo" class="w-full h-full object-cover rounded-lg" />
+    <header class="fixed top-0 w-full z-40 transition-all duration-700 ease-in-out {scrollY > 20 ? 'bg-[#0E1C14]/95 backdrop-blur-xl border-b border-[#C5A059]/40 shadow-[0_15px_40px_rgba(14,28,20,0.8)] py-4' : 'bg-gradient-to-b from-[#0E1C14]/95 via-[#0E1C14]/50 to-transparent py-6'}">
+        <div class="absolute inset-x-0 bottom-0 h-[1px] bg-gradient-to-r from-transparent via-[#C5A059]/50 to-transparent opacity-0 transition-opacity duration-700 {scrollY > 20 ? 'opacity-100' : ''}"></div>
+        <div class="max-w-7xl mx-auto px-6 flex items-center justify-between relative z-10">
+            <a href="#inicio" class="flex items-center gap-4 group">
+                <div class="relative w-14 h-14 rounded-xl overflow-hidden shadow-lg group-hover:shadow-[0_0_20px_rgba(197,160,89,0.5)] group-hover:scale-105 transition-all duration-500 border border-[#C5A059]/60 p-0.5 bg-[#0E1C14]">
+                    <img src="/src/lib/assets/fundacion/fundacionlogo.jpeg" alt="Logo Fundación" class="w-full h-full object-cover rounded-lg" />
+                    <div class="absolute inset-0 bg-[#C5A059]/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                 </div>
                 <div class="flex flex-col">
-                    <span class="font-serif font-bold text-xl text-[#0E1C14] tracking-widest leading-none" style="font-family: 'Cinzel', serif;">CASA LEGAL</span>
-                    <span class="text-[10px] text-[#C5A059] tracking-[0.3em] font-black uppercase mt-1">Fundación</span>
+                    <span class="font-serif font-black text-2xl text-white tracking-tight leading-none group-hover:text-[#C5A059] transition-colors drop-shadow-md" style="font-family: 'Cinzel', serif;">
+                        CASA <span class="text-[#C5A059]">LEGAL</span>
+                    </span>
+                    <span class="text-[10px] text-[#C5A059]/90 tracking-[0.25em] font-bold uppercase mt-1 group-hover:text-white transition-colors">Fundación</span>
                 </div>
             </a>
             
-            <nav class="hidden lg:flex items-center gap-4 text-xs font-bold text-gray-600 uppercase tracking-wider">
-                <a href="#inicio" class="hover:text-[#C5A059] transition-all">Inicio</a>
-                <a href="#servicios" class="hover:text-[#C5A059] transition-all">Áreas</a>
-                <a href="#equipo" class="hover:text-[#C5A059] transition-all">Equipo</a>
-                <a href="#noticias" class="hover:text-[#C5A059] transition-all">Noticias</a>
-                <a href="#faq" class="hover:text-[#C5A059] transition-all">Preguntas</a>
+            <nav class="hidden lg:flex items-center gap-8 text-sm font-bold text-gray-200 uppercase tracking-wide">
+                <a href="#inicio" class="relative group hover:text-white transition-colors duration-300 py-2">
+                    Inicio
+                    <span class="absolute bottom-0 left-0 w-0 h-[2px] bg-[#C5A059] transition-all duration-300 group-hover:w-full"></span>
+                </a>
+                <a href="#servicios" class="relative group hover:text-white transition-colors duration-300 py-2">
+                    Áreas
+                    <span class="absolute bottom-0 left-0 w-0 h-[2px] bg-[#C5A059] transition-all duration-300 group-hover:w-full"></span>
+                </a>
+                <a href="#equipo" class="relative group hover:text-white transition-colors duration-300 py-2">
+                    Equipo
+                    <span class="absolute bottom-0 left-0 w-0 h-[2px] bg-[#C5A059] transition-all duration-300 group-hover:w-full"></span>
+                </a>
+                <a href="#noticias" class="relative group hover:text-white transition-colors duration-300 py-2">
+                    Noticias
+                    <span class="absolute bottom-0 left-0 w-0 h-[2px] bg-[#C5A059] transition-all duration-300 group-hover:w-full"></span>
+                </a>
+                <a href="#faq" class="relative group text-gray-200 hover:text-[#C5A059] transition-colors duration-300 py-2">
+                    Preguntas
+                    <span class="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-[2px] bg-[#C5A059] transition-all duration-300 group-hover:w-full shadow-[0_0_8px_rgba(197,160,89,0.8)]"></span>
+                </a>
             </nav>
             
-            <a href="https://wa.me/59179607574" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 bg-[#1E4633] text-white px-5 py-2.5 rounded-full font-bold text-xs tracking-wider uppercase shadow-lg hover:bg-[#0E1C14] hover:shadow-xl hover:scale-105 transition-all">
-                <Phone class="w-4 h-4 text-[#C5A059]" />
+            <a href="https://wa.me/59179607574" target="_blank" rel="noopener noreferrer" class="relative overflow-hidden flex items-center gap-2 bg-gradient-to-r from-[#C5A059] to-[#b08d48] text-[#0E1C14] px-7 py-3 rounded-xl font-black text-sm tracking-widest shadow-[0_5px_20px_rgba(197,160,89,0.4)] hover:shadow-[0_10px_30px_rgba(197,160,89,0.6)] hover:-translate-y-1 transition-all duration-300 group">
+                <div class="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-in-out"></div>
+                <Phone class="w-4 h-4" />
                 <span>Asesoría Gratis</span>
             </a>
         </div>
@@ -341,33 +362,76 @@
                 </p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {#each content.services as service, i}
-                <div use:appearOnScroll={i * 100} class="bg-white/60 backdrop-blur-xl border border-white/80 rounded-3xl p-8 hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)] hover:-translate-y-2 transition-all duration-300 group">
-                    <div class="w-14 h-14 rounded-2xl bg-[#1E4633]/5 text-[#1E4633] flex items-center justify-center mb-6 group-hover:bg-[#1E4633] group-hover:text-[#C5A059] transition-all duration-300">
-                        {#if service.icon === 'Users'}<Users class="w-7 h-7" />{/if}
-                        {#if service.icon === 'Scale'}<Scale class="w-7 h-7" />{/if}
-                        {#if service.icon === 'Briefcase'}<Briefcase class="w-7 h-7" />{/if}
-                        {#if service.icon === 'Building'}<Building class="w-7 h-7" />{/if}
-                        {#if service.icon === 'CheckCircle2'}<CheckCircle2 class="w-7 h-7" />{/if}
-                        {#if service.icon === 'FileText'}<FileText class="w-7 h-7" />{/if}
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                {#each [
+                    '/categorias_fotos/Captura de pantalla 2026-09-15 005753.png',
+                    '/categorias_fotos/Captura de pantalla 2026-09-15 005805.png',
+                    '/categorias_fotos/Captura de pantalla 2026-09-15 005822.png',
+                    '/categorias_fotos/Captura de pantalla 2026-09-15 005852.png',
+                    '/categorias_fotos/Captura de pantalla 2026-09-15 005917.png',
+                    '/categorias_fotos/Captura de pantalla 2026-09-15 005944.png'
+                ] as imgUrl, i}
+                <div 
+                    role="button" 
+                    tabindex="0" 
+                    onclick={() => selectedCategory = imgUrl} 
+                    onkeydown={(e) => e.key === 'Enter' && (selectedCategory = imgUrl)}
+                    use:appearOnScroll={i * 100} 
+                    class="rounded-[2rem] overflow-hidden shadow-[0_10px_30px_rgba(0,0,0,0.08)] hover:shadow-[0_20px_40px_rgba(197,160,89,0.2)] hover:-translate-y-3 transition-all duration-500 group bg-white border border-[#C5A059]/20 cursor-pointer flex items-center justify-center relative h-64 sm:h-72"
+                >
+                    <img src={imgUrl} alt="Especialidad {i+1}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 filter saturate-100 group-hover:saturate-110" />
+                    <div class="absolute inset-0 bg-gradient-to-t from-[#0E1C14]/80 via-[#0E1C14]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-end justify-center pb-6">
+                        <span class="text-[#C5A059] font-bold tracking-widest uppercase text-sm flex items-center gap-2 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+                            Ver Detalles <ArrowRight class="w-4 h-4" />
+                        </span>
                     </div>
-                    <h3 class="text-xl text-[#0E1C14] font-bold mb-3" style="font-family: 'Cinzel', serif;">
-                        {#if isAdmin}
-                            <span contenteditable="true" bind:textContent={content.services[i].title} class="border-b-2 border-dashed border-[#C5A059] focus:outline-none focus:bg-gray-100 p-1 rounded transition-colors block"></span>
-                        {:else}
-                            {service.title}
-                        {/if}
-                    </h3>
-                    <p class="text-gray-600 leading-relaxed font-medium">
-                        {#if isAdmin}
-                            <span contenteditable="true" bind:textContent={content.services[i].desc} class="border-b-2 border-dashed border-[#C5A059] focus:outline-none focus:bg-gray-100 p-1 rounded transition-colors block"></span>
-                        {:else}
-                            {service.desc}
-                        {/if}
-                    </p>
                 </div>
                 {/each}
+            </div>
+
+            <!-- Enhanced Professional Features -->
+            <div class="mt-28 grid grid-cols-1 md:grid-cols-3 gap-8 text-center border-y border-gray-200 py-16 bg-white/50 backdrop-blur-sm rounded-3xl">
+                <div use:appearOnScroll={100} class="flex flex-col items-center">
+                    <div class="text-4xl md:text-5xl font-black text-[#1E4633] mb-2" style="font-family: 'Cinzel', serif;">+15<span class="text-[#C5A059]">Años</span></div>
+                    <p class="text-gray-500 font-bold uppercase tracking-widest text-xs">Experiencia Legal</p>
+                </div>
+                <div use:appearOnScroll={200} class="flex flex-col items-center md:border-x border-gray-200 px-4">
+                    <div class="text-4xl md:text-5xl font-black text-[#1E4633] mb-2" style="font-family: 'Cinzel', serif;">100<span class="text-[#C5A059]">%</span></div>
+                    <p class="text-gray-500 font-bold uppercase tracking-widest text-xs">Confidencialidad Garantizada</p>
+                </div>
+                <div use:appearOnScroll={300} class="flex flex-col items-center">
+                    <div class="text-4xl md:text-5xl font-black text-[#1E4633] mb-2" style="font-family: 'Cinzel', serif;">+800<span class="text-[#C5A059]">Casos</span></div>
+                    <p class="text-gray-500 font-bold uppercase tracking-widest text-xs">Resueltos a Favor</p>
+                </div>
+            </div>
+
+            <!-- How We Work Section -->
+            <div class="mt-28 text-center max-w-4xl mx-auto">
+                <span class="text-[#C5A059] text-sm font-bold tracking-widest uppercase block mb-4">Nuestro Proceso</span>
+                <h3 class="text-3xl md:text-4xl text-[#0E1C14] font-bold mb-16" style="font-family: 'Cinzel', serif;">El Camino Hacia Tu Tranquilidad</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-12 relative">
+                    <!-- Connecting Line -->
+                    <div class="hidden md:block absolute top-1/2 left-0 w-full h-0.5 bg-gray-200 -z-10"></div>
+                    
+                    <div use:appearOnScroll={100} class="relative bg-white p-8 rounded-3xl shadow-xl border border-gray-100">
+                        <div class="w-16 h-16 mx-auto bg-[#1E4633] text-white rounded-full flex items-center justify-center font-black text-xl mb-6 shadow-lg shadow-[#1E4633]/30 border-4 border-white absolute -top-8 left-1/2 transform -translate-x-1/2">1</div>
+                        <h4 class="text-xl font-bold text-[#0E1C14] mt-4 mb-3">Análisis Inicial</h4>
+                        <p class="text-gray-500 text-sm leading-relaxed">Escuchamos tu situación sin compromiso y evaluamos la viabilidad legal de tu caso con total honestidad.</p>
+                    </div>
+                    
+                    <div use:appearOnScroll={300} class="relative bg-white p-8 rounded-3xl shadow-xl border border-[#C5A059]/30">
+                        <div class="w-16 h-16 mx-auto bg-[#C5A059] text-white rounded-full flex items-center justify-center font-black text-xl mb-6 shadow-lg shadow-[#C5A059]/30 border-4 border-white absolute -top-8 left-1/2 transform -translate-x-1/2">2</div>
+                        <h4 class="text-xl font-bold text-[#0E1C14] mt-4 mb-3">Estrategia Legal</h4>
+                        <p class="text-gray-500 text-sm leading-relaxed">Diseñamos una hoja de ruta clara, reuniendo las pruebas y la documentación necesaria para proteger tus derechos.</p>
+                    </div>
+                    
+                    <div use:appearOnScroll={500} class="relative bg-white p-8 rounded-3xl shadow-xl border border-gray-100">
+                        <div class="w-16 h-16 mx-auto bg-[#1E4633] text-white rounded-full flex items-center justify-center font-black text-xl mb-6 shadow-lg shadow-[#1E4633]/30 border-4 border-white absolute -top-8 left-1/2 transform -translate-x-1/2">3</div>
+                        <h4 class="text-xl font-bold text-[#0E1C14] mt-4 mb-3">Resolución Exitosa</h4>
+                        <p class="text-gray-500 text-sm leading-relaxed">Ejecutamos acciones contundentes, ya sea mediante mediación pacífica o representación judicial firme.</p>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -641,6 +705,62 @@
     </footer>
     {/if}
 </div>
+
+{#if selectedCategory}
+<div class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6" in:fade={{ duration: 300 }} out:fade={{ duration: 300 }}>
+    <!-- Backdrop -->
+    <div 
+        class="absolute inset-0 bg-[#0E1C14]/80 backdrop-blur-sm cursor-pointer" 
+        onclick={() => selectedCategory = null}
+        onkeydown={(e) => e.key === 'Escape' && (selectedCategory = null)}
+        role="button"
+        tabindex="0"
+        aria-label="Cerrar modal"
+    ></div>
+    
+    <!-- Modal Content -->
+    <div class="relative bg-white rounded-3xl w-full max-w-2xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.5)] border border-[#C5A059]/30 flex flex-col max-h-[90vh]" in:fly={{ y: 20, duration: 400, delay: 150 }} out:fly={{ y: 20, duration: 300 }}>
+        <!-- Close Button -->
+        <button 
+            onclick={() => selectedCategory = null}
+            class="absolute top-4 right-4 z-10 w-10 h-10 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-[#1E4633] hover:bg-white hover:text-[#0E1C14] transition-colors shadow-sm"
+        >
+            <X class="w-5 h-5" />
+        </button>
+        
+        <!-- Image Area -->
+        <div class="relative w-full h-64 sm:h-80 bg-[#1E4633] flex-shrink-0">
+            <img src={selectedCategory} alt="Categoría" class="w-full h-full object-cover" />
+            <div class="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent"></div>
+        </div>
+        
+        <!-- Text & Action Area -->
+        <div class="p-8 sm:p-10 flex-1 overflow-y-auto">
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#1E4633]/10 text-[#1E4633] text-xs font-black tracking-widest uppercase mb-4">
+                <Shield class="w-4 h-4 text-[#C5A059]" />
+                Área de Enfoque
+            </div>
+            
+            <h3 class="text-3xl font-bold text-[#0E1C14] mb-4" style="font-family: 'Cinzel', serif;">
+                Asesoría Legal Especializada
+            </h3>
+            
+            <p class="text-gray-600 text-lg leading-relaxed mb-8">
+                Nuestro equipo de abogados expertos está listo para guiarte paso a paso. Analizaremos tu situación con total confidencialidad para brindarte la mejor estrategia jurídica y proteger tu patrimonio y tranquilidad.
+            </p>
+            
+            <a 
+                href="https://wa.me/59179607574?text={encodeURIComponent('Hola, quisiera recibir asesoría legal de la Fundación Casa Legal. Vengo desde la página web.')}" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                class="w-full sm:w-auto inline-flex items-center justify-center gap-3 bg-[#C5A059] hover:bg-[#b08d4f] text-white font-bold py-4 px-8 rounded-xl shadow-[0_10px_20px_rgba(197,160,89,0.3)] hover:shadow-[0_15px_30px_rgba(197,160,89,0.4)] transition-all hover:-translate-y-1 text-sm uppercase tracking-widest"
+            >
+                <Phone class="w-5 h-5" /> Solicitar Asesoría Ahora
+            </a>
+        </div>
+    </div>
+</div>
+{/if}
 
 <style>
   :global(html) {

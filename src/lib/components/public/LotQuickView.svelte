@@ -54,7 +54,7 @@
 					Reservado
 				</div>
 			{:else}
-				<div class="absolute bottom-2 left-2 px-2.5 py-1 bg-red-500 text-white text-xs font-bold rounded shadow-sm">
+				<div class="absolute bottom-2 left-2 px-2.5 py-1 bg-slate-700 text-white text-xs font-bold rounded shadow-sm">
 					Vendido
 				</div>
 			{/if}

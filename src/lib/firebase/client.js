@@ -4,14 +4,15 @@ import { getStorage } from "firebase/storage";
 import { getAuth } from "firebase/auth";
 import { getAnalytics } from "firebase/analytics";
 const firebaseConfig = {
-  apiKey: "AIzaSyC1X4XwAwT59ZgVPiHPInFCQqPC6ibe2EQ",
-  authDomain: "ucademy-87dc5.firebaseapp.com",
-  projectId: "ucademy-87dc5",
-  storageBucket: "ucademy-87dc5.firebasestorage.app",
-  messagingSenderId: "858279201138",
-  appId: "1:858279201138:web:c77e56c4082f12780b75eb",
-  measurementId: "G-YPPCZH1FSN"
+    apiKey: "AIzaSyAuDGxuzfOVNBZMj4aN6pC0Yu5xqBV0720",
+    authDomain: "casa-legal-inmobiliaria.firebaseapp.com",
+    projectId: "casa-legal-inmobiliaria",
+    storageBucket: "casa-legal-inmobiliaria.firebasestorage.app",
+    messagingSenderId: "294512233346",
+    appId: "1:294512233346:web:def9126d3926aa0be25d9b",
+    measurementId: "G-7410VBFE98"
 };
+
 
 // Initialize Firebase only once
 let app;
@@ -22,7 +23,7 @@ if (!getApps().length) {
 }
 
 // Initialize services
-const db = getFirestore(app);
+const db = getFirestore(app, "casalegalbolivia");
 const storage = getStorage(app);
 const auth = getAuth(app);
 
