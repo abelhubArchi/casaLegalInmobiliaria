@@ -315,11 +315,11 @@
 					<div class="md:col-span-3 md:row-span-2 rounded-xl overflow-hidden shadow-[0_20px_40px_rgba(0,0,0,0.1)] relative group cursor-zoom-in" onclick={() => openLightbox(activeImage)}>
 						<img src={activeImage} alt="Vista principal" class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-[1.02]" />
 					</div>
-					<div class="hidden md:flex flex-col gap-4 row-span-2 overflow-y-auto pr-2">
+					<div class="flex flex-row md:flex-col gap-4 md:row-span-2 overflow-x-auto md:overflow-y-auto pr-2 pb-2 md:pb-0 w-full">
 						{#each allImages as img}
 							<!-- svelte-ignore a11y_click_events_have_key_events -->
 							<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-							<div class={`relative rounded-xl overflow-hidden cursor-pointer flex-shrink-0 h-[32%] transition-all duration-300 ${activeImage === img ? 'ring-2 ring-brand-gold shadow-lg scale-100' : 'opacity-70 hover:opacity-100 hover:scale-[1.03]'}`} onclick={() => activeImage = img}>
+							<div class={`relative rounded-xl overflow-hidden cursor-pointer flex-shrink-0 w-[100px] md:w-auto h-[100px] md:h-[32%] transition-all duration-300 ${activeImage === img ? 'ring-2 ring-brand-gold shadow-lg scale-100' : 'opacity-70 hover:opacity-100 hover:scale-[1.03]'}`} onclick={() => activeImage = img}>
 								<img src={img} alt="Miniatura" class="w-full h-full object-cover" />
 							</div>
 						{/each}
@@ -395,7 +395,7 @@
 					
 					<!-- Agent Card -->
 					{#if agente}
-						<div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
+						<a href={`/agentes/${agente.id}`} class="block bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 hover:-translate-y-1 transition-transform group cursor-pointer relative z-10">
 							<div class="h-24 bg-brand-green-dark relative">
 								<div class="absolute inset-0 bg-brand-gold/10"></div>
 							</div>
@@ -403,19 +403,24 @@
 								<div class="w-24 h-24 mx-auto rounded-full border-4 border-white overflow-hidden -mt-12 bg-brand-green-dark shadow-lg relative z-10 flex items-center justify-center">
 									<img src={agente.foto} alt={agente.nombre} class="w-full h-full object-cover" />
 								</div>
-								<h4 class="text-xl font-serif font-bold text-brand-black mt-4">{agente.nombre}</h4>
-								<p class="text-brand-gold text-xs font-bold uppercase tracking-widest mb-6">{agente.rol}</p>
+								<h4 class="text-xl font-serif font-bold text-brand-black mt-4 group-hover:text-brand-gold transition-colors">{agente.nombre}</h4>
+								<p class="text-brand-gold text-xs font-bold uppercase tracking-widest mb-4">{agente.rol}</p>
+								
+								{#if agente.especialidades}
+									<p class="text-xs text-gray-500 mb-1 font-bold uppercase">Especialidades: <span class="text-brand-gold font-normal">{agente.especialidades}</span></p>
+								{/if}
+								{#if agente.idiomas}
+									<p class="text-xs text-gray-500 mb-4 font-bold uppercase">Idiomas: <span class="text-brand-gold font-normal">{agente.idiomas}</span></p>
+								{/if}
+
 								<div class="flex justify-center gap-4 mb-6">
-									<a href={`tel:${agente.telefono}`} class="w-10 h-10 rounded-full bg-gray-50 text-gray-600 flex items-center justify-center hover:bg-brand-gold hover:text-white transition-colors">
+									<button onclick={(e) => { e.preventDefault(); window.location.href=`tel:${agente.telefono}`; }} class="w-10 h-10 rounded-full bg-gray-50 text-gray-600 flex items-center justify-center hover:bg-brand-gold hover:text-white transition-colors z-20 relative">
 										<i class="fa-solid fa-phone"></i>
-									</a>
-									<a href={`/agentes/${agente.id}`} class="w-10 h-10 rounded-full bg-gray-50 text-gray-600 flex items-center justify-center hover:bg-brand-gold hover:text-white transition-colors" title="Ver Perfil">
-										<i class="fa-solid fa-user"></i>
-									</a>
+									</button>
 								</div>
-								<p class="text-sm text-gray-500 font-light border-t border-gray-100 pt-6">El agente designado para brindarte toda la información que necesites sobre este inmueble.</p>
+								<p class="text-sm text-gray-500 font-light border-t border-gray-100 pt-6">El agente designado para brindarte toda la informaci�n que necesites sobre este inmueble.</p>
 							</div>
-						</div>
+						</a>
 					{/if}
 
 					<!-- Lead Capture Form -->
