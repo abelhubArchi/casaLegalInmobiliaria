@@ -10,6 +10,7 @@
 		{ label: 'INICIO', href: '/' },
 		{ label: 'AGENTES', href: '/agentes' },
 		{ label: 'INMUEBLES', href: '/inmuebles' },
+		{ label: 'VENDER / ALQUILAR', href: '/quiero-vender' },
 		{ label: 'OFICINAS', href: '/oficinas' },
 		{ label: 'CONTACTOS', href: '/contactos' },
 		{ label: 'QUIÉNES SOMOS', href: '/quienes-somos' }
